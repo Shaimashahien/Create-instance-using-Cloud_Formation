@@ -1,0 +1,46 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Creates a VPC with public and private subnets
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 192.168.101.0/24
+  PublicSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: "us-east-1a"
+      CidrBlock: 192.168.101.0/28
+      MapPublicIpOnLaunch: true
+      VpcId: !Ref VPC
+  PrivateSubnetB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: "us-east-1b"
+      CidrBlock: 192.168.101.32/28
+      MapPublicIpOnLaunch: false
+      VpcId: !Ref VPC
+  shimaInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      AvailabilityZone: "us-east-1a"
+      ImageId: ami-0036b4598ccd42565
+      InstanceType: t2.micro
+      KeyName: shaima_key_pair
+      SecurityGroupIds: 
+        - Ref: SecurityGroup
+      SubnetId: 
+          Ref: PublicSubnetA
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: security group allows ssh and http
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
